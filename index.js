@@ -4,37 +4,28 @@ const { chromium } = require('playwright');
   const browser = await chromium.launch();
   const page = await browser.newPage();
 
-  const urls = [
-    "https://sanand0.github.io/tdsdata/seed49.html",
-    "https://sanand0.github.io/tdsdata/seed50.html",
-    "https://sanand0.github.io/tdsdata/seed51.html",
-    "https://sanand0.github.io/tdsdata/seed52.html",
-    "https://sanand0.github.io/tdsdata/seed53.html",
-    "https://sanand0.github.io/tdsdata/seed54.html",
-    "https://sanand0.github.io/tdsdata/seed55.html",
-    "https://sanand0.github.io/tdsdata/seed56.html",
-    "https://sanand0.github.io/tdsdata/seed57.html",
-    "https://sanand0.github.io/tdsdata/seed58.html"
-  ];
+  const seeds = [49,50,51,52,53,54,55,56,57,58];
 
-  let total = 0;
+  let grandTotal = 0;
 
-  for (let url of urls) {
-    await page.goto(url);
+  for (let seed of seeds) {
+    const url = `https://exam.sanand.workers.dev/tds-2026-01-ga3?seed=${seed}`;
 
-    // WAIT for table to load
-    await page.waitForSelector("table");
+    await page.goto(url, { waitUntil: 'networkidle' });
 
-    const numbers = await page.$$eval("td", cells =>
-      cells
-        .map(td => parseInt(td.innerText))
-        .filter(n => !isNaN(n))
+    // Wait a little extra to ensure JS rendering finishes
+    await page.waitForTimeout(3000);
+
+    const numbers = await page.$$eval('table td', cells =>
+      cells.map(cell => parseInt(cell.innerText)).filter(n => !isNaN(n))
     );
 
-    total += numbers.reduce((a, b) => a + b, 0);
+    const pageTotal = numbers.reduce((a, b) => a + b, 0);
+
+    grandTotal += pageTotal;
   }
 
-  console.log("FINAL TOTAL:", total);
+  console.log("FINAL TOTAL:", grandTotal);
 
   await browser.close();
 })();
