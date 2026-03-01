@@ -21,6 +21,10 @@ const { chromium } = require('playwright');
 
   for (let url of urls) {
     await page.goto(url);
+
+    // WAIT for table to load
+    await page.waitForSelector("table");
+
     const numbers = await page.$$eval("td", cells =>
       cells
         .map(td => parseInt(td.innerText))
